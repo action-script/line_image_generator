@@ -33,21 +33,38 @@ module.exports = (function() {
          window.innerHeight / - 2,
          1, 2000
       );
-      this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+ //     this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
       this.camera.position.z = 700;
       
-      var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-      var geometry = new LineMesh(500, 600, 50, 50);
+      var material = new THREE.MeshBasicMaterial({
+         map: this.getTexture()
+      });
+      var geometry = new LineMesh(500, 650, 50, 50);
       this.lineMesh = new THREE.Mesh( geometry, material );
       this.lineMesh.geometry.applyMatrix(
-         new THREE.Matrix4().makeTranslation( -250, -250, 0 )
+         new THREE.Matrix4().makeTranslation( -250, -325, 0 )
       );
 
       this.scene.add(this.lineMesh);
    };
 
+   Drawer.prototype.updateVertex = function() {
+//      this.lineMesh.geometry.vertices[ 90 ].x = Math.random()*200;
+//      this.lineMesh.geometry.verticesNeedUpdate = true;
+   };
+
+   Drawer.prototype.getTexture = function() {
+      // load a texture, set wrap mode to repeat
+      var texture = new THREE.TextureLoader().load( "img2.jpg" );
+//      texture.wrapS = THREE.RepeatWrapping;
+//      texture.wrapT = THREE.RepeatWrapping;
+//      texture.repeat.set( 4, 4 );
+      return texture;
+   };
+
    Drawer.prototype.setUpRenderDraw = function() {
       this.renderDraw = (function() {
+         this.updateVertex();
          this.lineMesh.rotation.z += 0.001;
          this.lineMesh.rotation.x = Math.sin(this.lineMesh.rotation.z)*0.8;
          requestAnimationFrame( this.renderDraw );
@@ -64,7 +81,7 @@ module.exports = (function() {
       this.camera.updateProjectionMatrix();
 
       this.renderer.setSize( width, height );
-   }
+   };
 
    return Drawer;
 
