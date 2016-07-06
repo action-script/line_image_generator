@@ -1,0 +1,20 @@
+{
+  "name": "line_image_generator",
+  "authors": [
+    "Nuño de la Serna"
+  ],
+  "description": "orthographic lines generator fot the web",
+  "main": "",
+  "license": "MIT",
+  "homepage": "action-io.tumblr.com",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "three.js": "threejs#*"
+  }
+}
