@@ -15,6 +15,7 @@
     "tests"
   ],
   "dependencies": {
-    "three.js": "threejs#*"
+    "three.js": "threejs#*",
+    "dat-gui": "^0.5.1"
   }
 }
