@@ -16,6 +16,7 @@
   ],
   "dependencies": {
     "three.js": "threejs#*",
-    "dat-gui": "^0.5.1"
+    "dat-gui": "^0.5.1",
+    "jquery": "^3.0.0"
   }
 }
