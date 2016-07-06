@@ -31,6 +31,11 @@ module.exports = (function() {
                y*cW + x+1,      // y  , x+1
                (y+1)*cW + x+1   // y+1, x+1
             ));
+            this.geom.faceVertexUvs[0].push([
+               new THREE.Vector2(x/cW, y/cH ),
+               new THREE.Vector2((x+1)/cW, y/cH ),
+               new THREE.Vector2((x+1)/cW, (y+1)/cH )
+            ]);
 
             /* Bottom triangle
              * |\
@@ -41,6 +46,11 @@ module.exports = (function() {
                (y+1)*cW + x+1,  // y+1, x+1
                (y+1)*cW + x     // y+1, x
             ));
+            this.geom.faceVertexUvs[0].push([
+               new THREE.Vector2(x/cW, y/cH ),
+               new THREE.Vector2((x+1)/cW, (y+1)/cH ),
+               new THREE.Vector2(x/cW, (y+1)/cH )
+            ]);
          }
       }
 
