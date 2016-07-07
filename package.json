@@ -10,6 +10,7 @@
   "author": "Nuño de la Serna",
   "license": "MIT",
   "devDependencies": {
+    "exports-loader": "^0.6.3",
     "gulp": "^3.9.1",
     "webpack-stream": "^3.2.0"
   }

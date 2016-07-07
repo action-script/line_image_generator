@@ -3,10 +3,12 @@ var LineMesh = require('./lineMesh.js');
 var Texture = require('./texture.js');
 
 module.exports = (function() {
-   function Drawer(node_canvas) {
+   function Drawer(config) {
+      this.config = config;
       try {
-         this.setUpCanvas(node_canvas);
+         this.setUpCanvas(this.config.canvas);
          this.setUpScene();
+         this.createLineMesh();
          this.setUpRenderDraw();
       } catch (e) {
          console.error('Can not initialize Drawer', e);
@@ -38,17 +40,34 @@ module.exports = (function() {
       );
  //     this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
       this.camera.position.z = 700;
+   };
+
+   Drawer.prototype.createLineMesh = function() {
+      var selectedObject = this.scene.getObjectByName(this.config.name);
+      this.scene.remove( selectedObject );
 
       var material = new THREE.MeshBasicMaterial({
          color: 0xffffff,
-         map: new Texture(this.renderer, 500, 600, 3).texture
+         map: new Texture(
+            this.renderer,
+            this.config.width,
+            this.config.height,
+            this.config.lineSize
+         ).texture
       });
 
-      var geometry = new LineMesh(500, 650, 50, 50);
+      var geometry = new LineMesh(
+         this.config.width,
+         this.config.height,
+         this.config.chunk, this.config.chunk
+      );
       this.lineMesh = new THREE.Mesh( geometry, material );
       this.lineMesh.material.transparent = true;
+      this.lineMesh.name = this.config.name;
       this.lineMesh.geometry.applyMatrix(
-         new THREE.Matrix4().makeTranslation( -250, -325, 0 )
+         new THREE.Matrix4().makeTranslation(
+            -(this.config.width/2), -(this.config.height/2), 0
+         )
       );
 
       this.scene.add(this.lineMesh);
@@ -63,9 +82,9 @@ module.exports = (function() {
       this.renderDraw = (function() {
          this.updateVertex();
          this.lineMesh.rotation.z += 0.001;
-         this.lineMesh.rotation.x = Math.sin(this.lineMesh.rotation.z)*0.8;
+         this.lineMesh.rotation.x = Math.sin(this.lineMesh.rotation.z)*0.4;
          requestAnimationFrame( this.renderDraw );
-         this.renderer.setClearColor( 0x121212 );
+         this.renderer.setClearColor( this.config.bg );
          this.renderer.render( this.scene, this.camera );
       }).bind(this);
       this.renderDraw();
