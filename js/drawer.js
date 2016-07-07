@@ -1,5 +1,6 @@
 var THREE = require('../bower_components/three.js/build/three.min.js');
 var LineMesh = require('./lineMesh.js');
+var Texture = require('./texture.js');
 
 module.exports = (function() {
    function Drawer(node_canvas) {
@@ -19,7 +20,9 @@ module.exports = (function() {
    Drawer.prototype.setUpCanvas = function(node_canvas) {
       if (node_canvas == null || node_canvas == undefined)
          throw 'Fail on canvas';
-      this.renderer = new THREE.WebGLRenderer();
+      this.renderer = new THREE.WebGLRenderer({
+         alpha: true
+      });
       this.renderer.setSize( window.innerWidth, window.innerHeight );
       node_canvas.appendChild( this.renderer.domElement );
    };
@@ -35,12 +38,15 @@ module.exports = (function() {
       );
  //     this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
       this.camera.position.z = 700;
-      
+
       var material = new THREE.MeshBasicMaterial({
-         map: this.getTexture()
+         color: 0xffffff,
+         map: new Texture(this.renderer, 500, 600, 3).texture
       });
+
       var geometry = new LineMesh(500, 650, 50, 50);
       this.lineMesh = new THREE.Mesh( geometry, material );
+      this.lineMesh.material.transparent = true;
       this.lineMesh.geometry.applyMatrix(
          new THREE.Matrix4().makeTranslation( -250, -325, 0 )
       );
@@ -53,21 +59,13 @@ module.exports = (function() {
 //      this.lineMesh.geometry.verticesNeedUpdate = true;
    };
 
-   Drawer.prototype.getTexture = function() {
-      // load a texture, set wrap mode to repeat
-      var texture = new THREE.TextureLoader().load( "img2.jpg" );
-//      texture.wrapS = THREE.RepeatWrapping;
-//      texture.wrapT = THREE.RepeatWrapping;
-//      texture.repeat.set( 4, 4 );
-      return texture;
-   };
-
    Drawer.prototype.setUpRenderDraw = function() {
       this.renderDraw = (function() {
          this.updateVertex();
          this.lineMesh.rotation.z += 0.001;
          this.lineMesh.rotation.x = Math.sin(this.lineMesh.rotation.z)*0.8;
          requestAnimationFrame( this.renderDraw );
+         this.renderer.setClearColor( 0x121212 );
          this.renderer.render( this.scene, this.camera );
       }).bind(this);
       this.renderDraw();
