@@ -1,6 +1,9 @@
 var THREE = require('../bower_components/three.js/build/three.min.js');
 var LineMesh = require('./lineMesh.js');
 var Texture = require('./texture.js');
+var shaders = {};
+shaders.vertex = require('raw!./glsl/vertex.shader');
+shaders.fragment = require('raw!./glsl/fragment.shader');
 
 module.exports = (function() {
    function Drawer(config) {
@@ -42,11 +45,8 @@ module.exports = (function() {
       this.camera.position.z = 700;
    };
 
-   Drawer.prototype.createLineMesh = function() {
-      var selectedObject = this.scene.getObjectByName(this.config.name);
-      this.scene.remove( selectedObject );
-
-      var material = new THREE.MeshBasicMaterial({
+   Drawer.prototype.createMaterial = function() {
+/*      var material = new THREE.MeshBasicMaterial({
          color: 0xffffff,
          map: new Texture(
             this.renderer,
@@ -55,6 +55,35 @@ module.exports = (function() {
             this.config.lineSize
          ).texture
       });
+*/
+      var line_texture = new Texture(
+         this.renderer,
+         this.config.width,
+         this.config.height,
+         this.config.lineSize
+      ).texture
+
+      var uniforms = {
+         texture: { type: 't', value: line_texture },
+         color1: { type: "c", value: new THREE.Color(this.config.color1) },
+         color2: { type: "c", value: new THREE.Color(this.config.color2) },
+         color3: { type: "c", value: new THREE.Color(this.config.color3) }
+      };
+
+      var material = new THREE.ShaderMaterial({
+         uniforms: uniforms,
+         vertexShader: shaders.vertex,
+         fragmentShader: shaders.fragment
+      });
+
+      return material;
+   }
+
+   Drawer.prototype.createLineMesh = function() {
+      var selectedObject = this.scene.getObjectByName(this.config.name);
+      this.scene.remove( selectedObject );
+
+      var material = this.createMaterial();
 
       var geometry = new LineMesh(
          this.config.width,
@@ -83,8 +112,15 @@ module.exports = (function() {
          this.updateVertex();
          this.lineMesh.rotation.z += 0.001;
          this.lineMesh.rotation.x = Math.sin(this.lineMesh.rotation.z)*0.4;
-         requestAnimationFrame( this.renderDraw );
+
+         this.lineMesh.material.uniforms.color1.value = new THREE.Color(this.config.color1);
+         this.lineMesh.material.uniforms.color2.value = new THREE.Color(this.config.color2);
+         this.lineMesh.material.uniforms.color3.value = new THREE.Color(this.config.color3);
+
+
          this.renderer.setClearColor( this.config.bg );
+
+         requestAnimationFrame( this.renderDraw );
          this.renderer.render( this.scene, this.camera );
       }).bind(this);
       this.renderDraw();

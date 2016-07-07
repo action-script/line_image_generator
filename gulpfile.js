@@ -5,7 +5,7 @@ var libraryName = 'Lig';
 var outputFile = 'lig.js';
 
 gulp.task('default', function() {
-   return gulp.src('js/main.js')
+   return gulp.src('src/main.js')
       .pipe(webpack({
          output: {
             filename: outputFile,
