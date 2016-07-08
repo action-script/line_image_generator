@@ -13,8 +13,8 @@ module.exports = (function() {
       this.config.canvas = node_canvas;
       this.config.controll = node_controll;
 
-      this.setUpControll();
       this.drawer = new Drawer(this.config);
+      this.setUpControll();
    }
  
    App.prototype.setUpControll = function() {
@@ -27,7 +27,7 @@ module.exports = (function() {
       var f1 = gui.addFolder('lines');
       var widthControll = f1.add(this.config, 'width', 200, 1800).step(10).listen();
       var heightControll = f1.add(this.config, 'height', 200, 1800).step(10).listen();
-      var sizeControll = f1.add(this.config, 'lineSize', { small: 2, medium: 3, large: 4, huge: 5}).name('size');
+      var sizeControll = f1.add(this.config, 'line_size', { small: 2, medium: 3, large: 4, huge: 5}).name('size');
       var chunkControll = f1.add(this.config, 'chunk', 50, 300).step(10);
 
       var f2 = gui.addFolder('colors');
@@ -38,8 +38,13 @@ module.exports = (function() {
 
 
       var f3 = gui.addFolder('animation');
-      f3.add(this.config, 'rotationz', -90, 90).name('spin').step(1).listen();
-      f3.add(this.config, 'rotationx', -10, 10).name('tilt').listen();
+      f3.add(this.config, 'noise_factor', 0, 100).name('acceleration').step(10);
+      f3.add(this.config, 'noise_speed', 0, 10).name('random').step(1);
+      f3.add(this.config, 'rotationz', -90, 90).name('spin').step(1);
+      f3.add(this.config, 'rotationx', -10, 10).name('tilt');
+
+
+//      gui.add(this.drawer, 'getImage').name('save image');
 
 
       widthControll.onChange((function(value) {

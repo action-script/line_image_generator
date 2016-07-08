@@ -5,6 +5,7 @@ var fxaa = require('../node_modules/three-shader-fxaa/build/index.js');
 
 var LineMesh = require('./lineMesh.js');
 var Texture = require('./texture.js');
+var NoiseMove = require('./noise.js');
 var shaders = {};
 
 shaders.vertex = require('raw!./glsl/vertex.shader');
@@ -32,40 +33,14 @@ module.exports = (function() {
          throw 'Fail on canvas';
       this.renderer = new THREE.WebGLRenderer({
          alpha: true,
-         antialias: true
+         antialias: true,
+         preserveDrawingBuffer: true
       });
       this.renderer.setSize( window.innerWidth, window.innerHeight);
       node_canvas.appendChild( this.renderer.domElement );
    };
 
    Drawer.prototype.setUpScene = function() {
-/*
-      this.screenScene = new THREE.Scene();
-
-      this.screenRenderTargetParams = {
-         minFilter: THREE.LinearFilter,
-         magFilter: THREE.NearestFilter,
-         format: THREE.RGBFormat,
-         stencilBuffer:false,
-         depthBuffer:false
-      };
-
-      this.screenBufferTexture = new THREE.WebGLRenderTarget(
-         window.innerWidth*2, window.innerHeight*2, 
-         this.screenRenderTargetParams);
-
-      var screenMaterial = new THREE.MeshBasicMaterial({
-         map: this.screenBufferTexture.texture 
-      });
-
-      this.plane = new THREE.Mesh(
-         new THREE.PlaneGeometry(window.innerWidth,window.innerHeight),
-         screenMaterial
-      );
-
-      this.screenScene.add(this.plane);
-*/
-
       this.scene = new THREE.Scene();
 
       this.camera = new THREE.OrthographicCamera(
@@ -73,10 +48,10 @@ module.exports = (function() {
          window.innerWidth / 2,
          window.innerHeight / 2,
          window.innerHeight / -2,
-         1, 1000
+         1, 3000
       );
 
-      this.camera.position.z = 700;
+      this.camera.position.z = 1000;
 
       // FXAA
       this.effectComposer = new EffectComposer(this.renderer);
@@ -96,7 +71,7 @@ module.exports = (function() {
          this.renderer,
          meshSize.width,
          meshSize.height,
-         this.config.lineSize
+         this.config.line_size
       ).texture
 
       var uniforms = {
@@ -120,15 +95,19 @@ module.exports = (function() {
       this.scene.remove( selectedObject );
 
       var meshSize = {
-         width: Math.floor(this.config.width / this.config.chunk) * this.config.chunk,
-         height: Math.floor(this.config.height / this.config.chunk) * this.config.chunk
+         width: Math.ceil(this.config.width / this.config.chunk) * this.config.chunk,
+         height: Math.ceil(this.config.height / this.config.chunk) * this.config.chunk
       }
+
+      this.noise_dost = new NoiseMove(
+         meshSize.width, meshSize.height, this.config.chunk
+      );
 
       var material = this.createMaterial(meshSize);
 
       var geometry = new LineMesh(
-         this.config.width,
-         this.config.height,
+         meshSize.width,
+         meshSize.height,
          this.config.chunk, this.config.chunk
       );
       this.lineMesh = new THREE.Mesh( geometry, material );
@@ -145,8 +124,24 @@ module.exports = (function() {
    };
 
    Drawer.prototype.updateVertex = function() {
-//      this.lineMesh.geometry.vertices[ 90 ].x = Math.random()*200;
-//      this.lineMesh.geometry.verticesNeedUpdate = true;
+      var noise_factor = this.config.noise_factor / 100;
+      var noise_speed = this.config.noise_speed / 100;
+      for (var y = 0; y < this.noise_dost.length; y++) {
+         for (var x = 0; x < this.noise_dost[y].length; x++) {
+            var i = y*this.noise_dost[y].length + x;
+            this.lineMesh.geometry.vertices[i].x += 
+               (-0.5 + Math.noise(this.noise_dost[y][x].x)) * noise_factor;
+            this.lineMesh.geometry.vertices[i].y += 
+               (-0.5 + Math.noise(this.noise_dost[y][x].y)) * noise_factor;
+            this.lineMesh.geometry.vertices[i].z += 
+               (-0.5 + Math.noise(this.noise_dost[y][x].z)) * noise_factor;
+
+            this.noise_dost[y][x].x += noise_speed;
+            this.noise_dost[y][x].y += noise_speed;
+            this.noise_dost[y][x].z += noise_speed;
+         }
+      }
+      this.lineMesh.geometry.verticesNeedUpdate = true;
    };
 
    Drawer.prototype.setUpRenderDraw = function() {
@@ -166,22 +161,40 @@ module.exports = (function() {
             window.innerWidth, window.innerHeight
          );
 
-         requestAnimationFrame( this.renderDraw );
 //         this.renderer.render( this.scene, this.camera );
+         requestAnimationFrame( this.renderDraw );
          this.effectComposer.render();
 /*
-         // render screen scene
-         this.renderer.setSize(
-            window.innerWidth, window.innerHeight
-         );
-
-         this.renderer.setClearColor( 0x00ff00 );
-         this.renderer.render( this.screenScene, this.camera );
+         if (this.config.saveImage) {
+            this.config.saveImage = false;
+            setTimeout((function() {
+               this.getImage();
+               requestAnimationFrame( this.renderDraw );
+            }).bind(this), 100);
+         }
+         else
+            requestAnimationFrame( this.renderDraw );
 */
       }).bind(this);
 
       this.renderDraw();
    };
+
+   Drawer.prototype.getImage = function() {
+      var imgData, imgNode;
+      try {
+         imgData = this.renderer.domElement.toDataURL();      
+         console.log(imgData);
+      } 
+      catch(e) {
+         console.log("Browser does not support taking screenshot of 3d context");
+         return;
+      }
+
+      imgNode = document.createElement("img");
+      imgNode.src = imgData;
+      document.body.appendChild(imgNode);
+   }
 
    Drawer.prototype.resize = function(width, height) {
       this.camera.left = width / -2;

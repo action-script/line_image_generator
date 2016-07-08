@@ -2,8 +2,10 @@ var THREE = require('../bower_components/three.js/build/three.min.js');
 
 module.exports = (function() {
    function LineMesh(w, h, rw, rh) {
-      var cW = Math.floor(w / rw) +1;
-      var cH = Math.floor(h / rh) +1;
+//      var cW = Math.floor(w / rw) +1;
+//      var cH = Math.floor(h / rh) +1;
+      var cW = Math.ceil(w / rw)+1;
+      var cH = Math.ceil(h / rh)+1;
 
       this.geom = new THREE.Geometry();
       var dots = [];
@@ -13,7 +15,7 @@ module.exports = (function() {
          if (dots[y] == undefined)
             dots[y] = [];
          for (var x = 0; x < cW; x++) {
-            dots[y][x] = new THREE.Vector3(x*rw, y*rh, Math.random()*90);
+            dots[y][x] = new THREE.Vector3(x*rw, y*rh, 0);
             this.geom.vertices.push(dots[y][x]);
          }
       }
