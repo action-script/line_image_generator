@@ -10,17 +10,26 @@ varying vec2 vertTexCoord;
 
 void main() {
    vec4 textureLine = texture2D(texture, vertTexCoord.st);
-   float depth = ((50.+vertexPos.z)/2.)/70.;
+   float depth = clamp(0., 1., (abs(vertexPos.z))/90. );
 
    vec3 color = mix(
       mix(
          color1,
-         color3,
-         depth*depth*4.
+         color2,
+         clamp(0., 1., depth*depth*4.)
       ),
-      color2,
-      log(depth*2.) * depth * depth * 4.
+      color3,
+      clamp(0., 1., log(depth*2.) * depth * depth * 3.5)
    );
 
    gl_FragColor = vec4(color, textureLine.a);
+
+/*
+gl_FragColor = vec4(
+      textureLine.r * log2(depth*3.)/2.,
+      textureLine.g * sin(depth * PI)/(depth*3.),
+      textureLine.b * sin(depth * PI)/1.1,
+      textureLine.a
+   );
+*/
 }

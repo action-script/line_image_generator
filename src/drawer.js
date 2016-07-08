@@ -124,8 +124,8 @@ module.exports = (function() {
    };
 
    Drawer.prototype.updateVertex = function() {
-      var noise_factor = this.config.noise_factor / 100;
-      var noise_speed = this.config.noise_speed / 100;
+      var noise_factor = this.config.noise_factor / 80;
+      var noise_speed = this.config.noise_speed / 200;
       for (var y = 0; y < this.noise_dost.length; y++) {
          for (var x = 0; x < this.noise_dost[y].length; x++) {
             var i = y*this.noise_dost[y].length + x;
@@ -148,8 +148,8 @@ module.exports = (function() {
       this.renderDraw = (function() {
          // render scene
          this.updateVertex();
+         this.lineMesh.rotation.x = -this.config.rotationx/20.0;
          this.lineMesh.rotation.z = this.config.rotationz * Math.PI/180;
-         this.lineMesh.rotation.x = -this.config.rotationx/20.0 - Math.sin(this.lineMesh.rotation.z)*0.2;
 
          this.lineMesh.material.uniforms.color1.value = new THREE.Color(this.config.color1);
          this.lineMesh.material.uniforms.color2.value = new THREE.Color(this.config.color2);
