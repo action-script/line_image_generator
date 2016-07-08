@@ -1,6 +1,6 @@
 {
   "name": "line_image_generator",
-  "version": "0.0.1",
+  "version": "0.11.0,
   "description": "orthographic lines generator fot the web",
   "main": "index.js",
   "scripts": {
