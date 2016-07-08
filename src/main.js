@@ -38,6 +38,8 @@ module.exports = (function() {
 
 
       var f3 = gui.addFolder('animation');
+      f3.add(this.config, 'rotationSpeed', -10, 10).name('spin').listen();
+      f3.add(this.config, 'rotationx', -10, 10).name('tilt').listen();
 
 
       widthControll.onChange((function(value) {

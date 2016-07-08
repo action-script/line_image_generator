@@ -14,5 +14,9 @@
     "gulp": "^3.9.1",
     "raw-loader": "^0.5.1",
     "webpack-stream": "^3.2.0"
+  },
+  "dependencies": {
+    "three-effectcomposer": "0.0.1",
+    "three-shader-fxaa": "^5.1.1"
   }
 }

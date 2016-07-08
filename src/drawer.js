@@ -1,7 +1,12 @@
 var THREE = require('../bower_components/three.js/build/three.min.js');
+window.THREE = THREE;
+var EffectComposer = require('../node_modules/three-effectcomposer/index.js')(THREE);
+var fxaa = require('../node_modules/three-shader-fxaa/build/index.js');
+
 var LineMesh = require('./lineMesh.js');
 var Texture = require('./texture.js');
 var shaders = {};
+
 shaders.vertex = require('raw!./glsl/vertex.shader');
 shaders.fragment = require('raw!./glsl/fragment.shader');
 
@@ -26,36 +31,67 @@ module.exports = (function() {
       if (node_canvas == null || node_canvas == undefined)
          throw 'Fail on canvas';
       this.renderer = new THREE.WebGLRenderer({
-         alpha: true
+         alpha: true,
+         antialias: true
       });
-      this.renderer.setSize( window.innerWidth, window.innerHeight );
+      this.renderer.setSize( window.innerWidth, window.innerHeight);
       node_canvas.appendChild( this.renderer.domElement );
    };
 
    Drawer.prototype.setUpScene = function() {
+/*
+      this.screenScene = new THREE.Scene();
+
+      this.screenRenderTargetParams = {
+         minFilter: THREE.LinearFilter,
+         magFilter: THREE.NearestFilter,
+         format: THREE.RGBFormat,
+         stencilBuffer:false,
+         depthBuffer:false
+      };
+
+      this.screenBufferTexture = new THREE.WebGLRenderTarget(
+         window.innerWidth*2, window.innerHeight*2, 
+         this.screenRenderTargetParams);
+
+      var screenMaterial = new THREE.MeshBasicMaterial({
+         map: this.screenBufferTexture.texture 
+      });
+
+      this.plane = new THREE.Mesh(
+         new THREE.PlaneGeometry(window.innerWidth,window.innerHeight),
+         screenMaterial
+      );
+
+      this.screenScene.add(this.plane);
+*/
+
       this.scene = new THREE.Scene();
+
       this.camera = new THREE.OrthographicCamera(
-         window.innerWidth / - 2,
+         window.innerWidth / -2,
          window.innerWidth / 2,
          window.innerHeight / 2,
-         window.innerHeight / - 2,
+         window.innerHeight / -2,
          1, 2000
       );
- //     this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+
       this.camera.position.z = 700;
+
+      // FXAA
+      this.effectComposer = new EffectComposer(this.renderer);
+      this.effectComposer.addPass(
+         new EffectComposer.RenderPass(this.scene, this.camera)
+      );
+
+      this.shaderPass = new EffectComposer.ShaderPass(fxaa());
+      this.shaderPass.renderToScreen = true
+      this.effectComposer.addPass(this.shaderPass);
+
+      this.shaderPass.uniforms.resolution.value.set(window.innerWidth, window.innerHeight);
    };
 
    Drawer.prototype.createMaterial = function() {
-/*      var material = new THREE.MeshBasicMaterial({
-         color: 0xffffff,
-         map: new Texture(
-            this.renderer,
-            this.config.width,
-            this.config.height,
-            this.config.lineSize
-         ).texture
-      });
-*/
       var line_texture = new Texture(
          this.renderer,
          this.config.width,
@@ -109,9 +145,10 @@ module.exports = (function() {
 
    Drawer.prototype.setUpRenderDraw = function() {
       this.renderDraw = (function() {
+         // render scene
          this.updateVertex();
-         this.lineMesh.rotation.z += 0.001;
-         this.lineMesh.rotation.x = Math.sin(this.lineMesh.rotation.z)*0.4;
+         this.lineMesh.rotation.z += this.config.rotationSpeed / 2000.0;
+         this.lineMesh.rotation.x = -this.config.rotationx/20.0 - Math.sin(this.lineMesh.rotation.z)*0.2;
 
          this.lineMesh.material.uniforms.color1.value = new THREE.Color(this.config.color1);
          this.lineMesh.material.uniforms.color2.value = new THREE.Color(this.config.color2);
@@ -121,8 +158,18 @@ module.exports = (function() {
          this.renderer.setClearColor( this.config.bg );
 
          requestAnimationFrame( this.renderDraw );
-         this.renderer.render( this.scene, this.camera );
+         this.effectComposer.render();
+/*
+         // render screen scene
+         this.renderer.setSize(
+            window.innerWidth, window.innerHeight
+         );
+
+         this.renderer.setClearColor( 0x00ff00 );
+         this.renderer.render( this.screenScene, this.camera );
+*/
       }).bind(this);
+
       this.renderDraw();
    };
 
@@ -134,6 +181,10 @@ module.exports = (function() {
       this.camera.updateProjectionMatrix();
 
       this.renderer.setSize( width, height );
+
+      this.shaderPass.uniforms.resolution.value.set(width, height);
+//      this.screenBufferTexture.setSize(width*2, height*2);
+//      this.plane.geometry = new THREE.PlaneGeometry(width, height);
    };
 
    return Drawer;
