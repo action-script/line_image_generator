@@ -27,8 +27,8 @@ module.exports = (function() {
       var f1 = gui.addFolder('lines');
       var widthControll = f1.add(this.config, 'width', 200, 1800).step(10).listen();
       var heightControll = f1.add(this.config, 'height', 200, 1800).step(10).listen();
-      var sizeControll = f1.add(this.config, 'lineSize', { small: 1, medium: 2, large: 4, huge: 6}).name('size');
-      var chunkControll = f1.add(this.config, 'chunk', 20, 200).step(10);
+      var sizeControll = f1.add(this.config, 'lineSize', { small: 2, medium: 3, large: 4, huge: 5}).name('size');
+      var chunkControll = f1.add(this.config, 'chunk', 50, 300).step(10);
 
       var f2 = gui.addFolder('colors');
       f2.addColor(this.config, 'bg').name('background').listen();
@@ -38,7 +38,7 @@ module.exports = (function() {
 
 
       var f3 = gui.addFolder('animation');
-      f3.add(this.config, 'rotationSpeed', -10, 10).name('spin').listen();
+      f3.add(this.config, 'rotationz', -90, 90).name('spin').step(1).listen();
       f3.add(this.config, 'rotationx', -10, 10).name('tilt').listen();
 
 

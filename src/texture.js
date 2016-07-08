@@ -28,19 +28,22 @@ module.exports = (function() {
 
       var material = new THREE.LineBasicMaterial({ 
          color: 0xffffff,
-         linewidth: size 
+         linewidth: 1 
       });
 
       for (var y = 0; y < height; y += size*2) {
-         var geometry = new THREE.Geometry();
+         for(var i = 0; i < size; i++) {
+            var geometry = new THREE.Geometry();
 
-         geometry.vertices.push( new THREE.Vector3(0, y, 0) );
-         geometry.vertices.push( new THREE.Vector3(width, y, 0) );
+            geometry.vertices.push( new THREE.Vector3(0, y+i, 0) );
+            geometry.vertices.push( new THREE.Vector3(width, y+i, 0) );
 
-         var line = new THREE.Line(geometry, material);
-         bufferScene.add( line ); 
+            var line = new THREE.Line(geometry, material);
+            bufferScene.add( line );
+         }
       }
 
+      renderer.setSize(width, height);
       renderer.render( bufferScene, camera, bufferTexture, true);
 
       return bufferTexture;

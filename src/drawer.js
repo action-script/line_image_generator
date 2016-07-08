@@ -73,7 +73,7 @@ module.exports = (function() {
          window.innerWidth / 2,
          window.innerHeight / 2,
          window.innerHeight / -2,
-         1, 2000
+         1, 1000
       );
 
       this.camera.position.z = 700;
@@ -91,11 +91,11 @@ module.exports = (function() {
       this.shaderPass.uniforms.resolution.value.set(window.innerWidth, window.innerHeight);
    };
 
-   Drawer.prototype.createMaterial = function() {
+   Drawer.prototype.createMaterial = function(meshSize) {
       var line_texture = new Texture(
          this.renderer,
-         this.config.width,
-         this.config.height,
+         meshSize.width,
+         meshSize.height,
          this.config.lineSize
       ).texture
 
@@ -119,7 +119,12 @@ module.exports = (function() {
       var selectedObject = this.scene.getObjectByName(this.config.name);
       this.scene.remove( selectedObject );
 
-      var material = this.createMaterial();
+      var meshSize = {
+         width: Math.floor(this.config.width / this.config.chunk) * this.config.chunk,
+         height: Math.floor(this.config.height / this.config.chunk) * this.config.chunk
+      }
+
+      var material = this.createMaterial(meshSize);
 
       var geometry = new LineMesh(
          this.config.width,
@@ -129,9 +134,10 @@ module.exports = (function() {
       this.lineMesh = new THREE.Mesh( geometry, material );
       this.lineMesh.material.transparent = true;
       this.lineMesh.name = this.config.name;
+
       this.lineMesh.geometry.applyMatrix(
          new THREE.Matrix4().makeTranslation(
-            -(this.config.width/2), -(this.config.height/2), 0
+            -(meshSize.width/2), -(meshSize.height/2), 0
          )
       );
 
@@ -147,7 +153,7 @@ module.exports = (function() {
       this.renderDraw = (function() {
          // render scene
          this.updateVertex();
-         this.lineMesh.rotation.z += this.config.rotationSpeed / 2000.0;
+         this.lineMesh.rotation.z = this.config.rotationz * Math.PI/180;
          this.lineMesh.rotation.x = -this.config.rotationx/20.0 - Math.sin(this.lineMesh.rotation.z)*0.2;
 
          this.lineMesh.material.uniforms.color1.value = new THREE.Color(this.config.color1);
@@ -156,8 +162,12 @@ module.exports = (function() {
 
 
          this.renderer.setClearColor( this.config.bg );
+         this.renderer.setSize(
+            window.innerWidth, window.innerHeight
+         );
 
          requestAnimationFrame( this.renderDraw );
+//         this.renderer.render( this.scene, this.camera );
          this.effectComposer.render();
 /*
          // render screen scene
