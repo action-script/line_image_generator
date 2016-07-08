@@ -31,10 +31,10 @@ module.exports = (function() {
       var chunkControll = f1.add(this.config, 'chunk', 50, 300).step(10);
 
       var f2 = gui.addFolder('colors');
-      f2.addColor(this.config, 'bg').name('background').listen();
-      f2.addColor(this.config, 'color1').name('color A').listen();
-      f2.addColor(this.config, 'color2').name('color B').listen();
-      f2.addColor(this.config, 'color3').name('color C').listen();
+      f2.addColor(this.config, 'bg').name('background');
+      f2.addColor(this.config, 'color1').name('color A');
+      f2.addColor(this.config, 'color2').name('color B');
+      f2.addColor(this.config, 'color3').name('color C');
 
 
       var f3 = gui.addFolder('animation');
